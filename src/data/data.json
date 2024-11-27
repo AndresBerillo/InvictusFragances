@@ -1,0 +1,23 @@
+{
+    "perfumes": [
+      {
+        "id": 1,
+        "nombre": "Perfume A",
+        "precio": 50,
+        "imagen": "link-a-la-imagen",
+        "descripcion": "Fragancia floral."
+      },
+      {
+        "id": 2,
+        "nombre": "Perfume B",
+        "precio": 70,
+        "imagen": "link-a-la-imagen",
+        "descripcion": "Aroma cítrico y fresco."
+      }
+    ],
+    "usuarios": [
+      { "id": 1, "nombre": "admin", "rol": "admin", "password": "admin123" },
+      { "id": 2, "nombre": "cliente", "rol": "usuario", "password": "cliente123" }
+    ]
+  }
+  

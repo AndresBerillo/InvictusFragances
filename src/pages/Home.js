@@ -4,6 +4,8 @@ import Header from '../components/Header';
 import Footer from '../components/Footer';
 
 const Home = () => {
+
+  console.log(perfumes);
     return (
       <>
         <Header /> {/* Encabezado */}
@@ -17,6 +19,9 @@ const Home = () => {
             ))}
           </div>
         </div>
+        <br></br>
+        <br></br>
+        <br></br>
         <Footer /> {/* Pie de página */}
       </>
     );

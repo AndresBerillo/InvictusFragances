@@ -3,8 +3,9 @@ import Home from './pages/Home';
 import Login from './pages/Login';
 import ProductDetails from './pages/ProductDetails';
 import Admin from './pages/Admin';
+import Cart from './pages/Cart'; // Importa la página Cart
+import Checkout from './pages/Checkout'; // Importa Checkout
 import ProtectedRoute from './components/ProtectedRoute';
-
 
 function App() {
   return (
@@ -29,6 +30,8 @@ function App() {
               </ProtectedRoute>
             }
           />
+          <Route path="/cart" element={<Cart />} /> 
+          <Route path="/checkout" element={<Checkout />} /> 
         </Routes>
       </>
     </Router>
@@ -36,5 +39,3 @@ function App() {
 }
 
 export default App;
-
-

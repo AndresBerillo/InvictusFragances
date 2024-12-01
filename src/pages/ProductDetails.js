@@ -2,31 +2,45 @@ import React from 'react';
 import { useCart } from '../context/CartContext';
 import { useParams, useNavigate } from 'react-router-dom';
 import perfumes from '../data/data.json';
+import Header from '../components/Header'; // Importa el Header
+import Footer from '../components/Footer'; // Importa el Footer
 
 const ProductDetails = () => {
-  const { id } = useParams();
-  const product = perfumes.perfumes.find((item) => item.id === parseInt(id));
+  const { id } = useParams(); // ID recibido desde la URL como string
+  const product = perfumes.perfumes.find((item) => item.id === id); // Comparación como string
   const { addToCart } = useCart();
   const navigate = useNavigate();
 
   if (!product) return <h1>Producto no encontrado</h1>;
 
   return (
-    <div className="container my-4">
-      <h1>{product.name}</h1>
-      <p>{product.description}</p>
-      <p>Precio: ${product.price}</p>
-      <button
-        className="btn btn-primary"
-        onClick={() => {
-          addToCart(product);
-          navigate('/cart');
-        }}
-      >
-        Añadir al carrito
-      </button>
-    </div>
+    <>
+      <Header /> {/* Añade el Header */}
+      <div className="container my-4">
+        <h1>{product.nombre}</h1> {/* Mostrar nombre del producto */}
+        <p>{product.descripcion}</p> {/* Mostrar descripción */}
+        <p>Precio: ${product.precio}</p> {/* Mostrar precio */}
+        {product.imagen && (
+          <img
+            src={product.imagen}
+            alt={product.nombre}
+            style={{ width: '300px', height: '300px', objectFit: 'cover' }}
+          />
+        )}
+        <button
+          className="btn btn-primary mt-3"
+          onClick={() => {
+            addToCart(product); // Añadir al carrito
+            navigate('/cart'); // Redirigir al carrito
+          }}
+        >
+          Añadir al carrito
+        </button>
+      </div>
+      <Footer /> {/* Añade el Footer */}
+    </>
   );
 };
 
 export default ProductDetails;
+

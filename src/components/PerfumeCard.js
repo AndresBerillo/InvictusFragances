@@ -1,6 +1,8 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import perfumes from '../data/data.json';
+
 
 const PerfumeCard = ({ perfume }) => {
   const { isAuthenticated } = useAuth();
@@ -8,19 +10,19 @@ const PerfumeCard = ({ perfume }) => {
 
   const handleBuyClick = () => {
     if (isAuthenticated) {
-      navigate(`/product/${perfume.id}`); // Redirige a detalles del producto
+      navigate(`/product/${perfume.id}`);
     } else {
       alert('Por favor, inicie sesión para comprar.');
-      navigate('/login'); // Redirige a la página de login
+      navigate('/login');
     }
   };
 
   return (
     <div className="card">
-      <img src={perfume.image} className="card-img-top" alt={perfume.name} />
+      <img src={perfume.imagen} className="card-img-top" alt={perfume.nombre} />
       <div className="card-body">
-        <h5 className="card-title">{perfume.name}</h5>
-        <p className="card-text">${perfume.price}</p>
+        <h5 className="card-title">{perfume.nombre}</h5>
+        <p className="card-text">${perfume.precio}</p>
         <button className="btn btn-primary" onClick={handleBuyClick}>
           Comprar
         </button>
@@ -30,3 +32,4 @@ const PerfumeCard = ({ perfume }) => {
 };
 
 export default PerfumeCard;
+

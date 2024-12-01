@@ -38,6 +38,7 @@ const PerfumeCard = ({ perfumeId }) => {
       />
       <div className="card-body">
         <h5 className="card-title">{perfume.nombre}</h5>
+        <p className="card-text">{perfume.descripcion}</p> {/* Mostrar la descripción */}
         <p className="card-text">${perfume.precio}</p>
         <button className="btn btn-primary" onClick={handleBuyClick}>
           Comprar

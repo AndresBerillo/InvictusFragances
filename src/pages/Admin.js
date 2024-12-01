@@ -15,14 +15,24 @@ const Admin = () => {
   });
   const [showForm, setShowForm] = useState(false); // Estado para mostrar u ocultar el formulario
 
-  // Cargar datos iniciales solo al montar el componente
+  // Cargar datos iniciales desde Local Storage o JSON
   useEffect(() => {
-    const normalizedProducts = perfumesData.perfumes.map(product => ({
-      ...product,
-      id: String(product.id), // Convertir a cadena
-    }));
-    setProducts(normalizedProducts);
+    const storedProducts = JSON.parse(localStorage.getItem('products'));
+    if (storedProducts) {
+      setProducts(storedProducts);
+    } else {
+      const normalizedProducts = perfumesData.perfumes.map(product => ({
+        ...product,
+        id: String(product.id), // Convertir a cadena
+      }));
+      setProducts(normalizedProducts);
+      localStorage.setItem('products', JSON.stringify(normalizedProducts)); // Guardar en Local Storage
+    }
   }, []); // Array vacío asegura que se ejecute solo una vez
+
+  const saveToLocalStorage = (products) => {
+    localStorage.setItem('products', JSON.stringify(products));
+  };
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -31,16 +41,18 @@ const Admin = () => {
 
   const handleFileChange = (e) => {
     const file = e.target.files[0];
-    if (file) {
+    if (file && (file.type === 'image/png' || file.type === 'image/jpeg')) {
       const reader = new FileReader();
       reader.onloadend = () => {
         setNewProduct({ ...newProduct, imagen: reader.result });
       };
       reader.readAsDataURL(file); // Leer el archivo como base64
+    } else {
+      alert('Solo se permiten archivos PNG o JPG.');
     }
   };
 
-  const handleAddProduct = async (e) => {
+  const handleAddProduct = (e) => {
     e.preventDefault();
     if (!newProduct.nombre || !newProduct.precio || !newProduct.imagen) {
       alert('Por favor completa todos los campos, incluida la imagen.');
@@ -52,45 +64,16 @@ const Admin = () => {
       const nextId = products.length > 0 ? String(Math.max(...products.map((p) => Number(p.id))) + 1) : "1";
       const newProductWithId = { ...newProduct, id: nextId }; // Convertir el ID a String
 
-      try {
-        const response = await fetch('http://localhost:5000/perfumes', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify(newProductWithId),
-        });
-
-        if (response.ok) {
-          const addedProduct = await response.json();
-          setProducts((prevProducts) => [...prevProducts, addedProduct]); // Actualiza el estado con el nuevo producto
-        }
-      } catch (error) {
-        console.error('Error al guardar el producto:', error);
-      }
+      const updatedProducts = [...products, newProductWithId];
+      setProducts(updatedProducts); // Actualizar estado
+      saveToLocalStorage(updatedProducts); // Guardar en Local Storage
     } else {
       // Editar un producto existente
-      const updatedProduct = { ...newProduct, id: currentProductId };
-
-      try {
-        const response = await fetch(`http://localhost:5000/perfumes/${currentProductId}`, {
-          method: 'PUT',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify(updatedProduct),
-        });
-
-        if (response.ok) {
-          setProducts((prevProducts) =>
-            prevProducts.map((product) =>
-              product.id === currentProductId ? updatedProduct : product
-            )
-          ); // Actualiza el estado con el producto editado
-        }
-      } catch (error) {
-        console.error('Error al editar el producto:', error);
-      }
+      const updatedProducts = products.map((product) =>
+        product.id === currentProductId ? { ...newProduct, id: currentProductId } : product
+      );
+      setProducts(updatedProducts); // Actualizar estado
+      saveToLocalStorage(updatedProducts); // Guardar en Local Storage
     }
 
     // Restablecer estados y cerrar formulario
@@ -105,23 +88,13 @@ const Admin = () => {
     setShowForm(true);
   };
 
-  const handleDeleteProduct = async (id) => {
+  const handleDeleteProduct = (id) => {
     const confirmDelete = window.confirm('¿Estás seguro de eliminar este producto?');
     if (!confirmDelete) return;
 
-    try {
-      const response = await fetch(`http://localhost:5000/perfumes/${id}`, {
-        method: 'DELETE',
-      });
-
-      if (response.ok) {
-        setProducts((prevProducts) =>
-          prevProducts.filter((product) => product.id !== id)
-        ); // Actualiza el estado después de eliminar
-      }
-    } catch (error) {
-      console.error('Error al eliminar el producto:', error);
-    }
+    const updatedProducts = products.filter((product) => product.id !== id);
+    setProducts(updatedProducts); // Actualizar estado
+    saveToLocalStorage(updatedProducts); // Guardar en Local Storage
   };
 
   return (
@@ -242,6 +215,10 @@ const Admin = () => {
           </tbody>
         </table>
       </div>
+      <br></br>
+      <br></br>
+      <br></br>
+
       <Footer /> {/* Incluye el Footer */}
     </>
   );

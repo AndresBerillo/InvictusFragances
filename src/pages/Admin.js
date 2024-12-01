@@ -1,57 +1,86 @@
 import React, { useState, useEffect } from 'react';
 import perfumesData from '../data/data.json';
-import Header from '../components/Header'; // Importa el componente Header
-import Footer from '../components/Footer'; // Importa el componente Footer
+import Header from '../components/Header';
+import Footer from '../components/Footer';
 
 const Admin = () => {
   const [products, setProducts] = useState([]);
-  const [currentProductId, setCurrentProductId] = useState(null); // ID del producto que se está editando
+  const [users, setUsers] = useState([]);
+  const [currentProductId, setCurrentProductId] = useState(null);
+  const [currentUserId, setCurrentUserId] = useState(null); // ID del usuario que se está editando
   const [newProduct, setNewProduct] = useState({
     id: '',
     nombre: '',
     precio: '',
     descripcion: '',
-    imagen: '', // URL o base64 de la imagen
+    imagen: '',
   });
-  const [showForm, setShowForm] = useState(false); // Estado para mostrar u ocultar el formulario
+  const [newUser, setNewUser] = useState({
+    id: '',
+    username: '',
+    password: '',
+    role: 'user',
+  });
+  const [showProductForm, setShowProductForm] = useState(false);
+  const [showUserForm, setShowUserForm] = useState(false);
 
-  // Cargar datos iniciales desde Local Storage o JSON
+  // Cargar datos desde Local Storage para productos y usuarios
   useEffect(() => {
     const storedProducts = JSON.parse(localStorage.getItem('products'));
+    const storedUsers = JSON.parse(localStorage.getItem('users')) || [];
+
     if (storedProducts) {
       setProducts(storedProducts);
     } else {
-      const normalizedProducts = perfumesData.perfumes.map(product => ({
+      const normalizedProducts = perfumesData.perfumes.map((product) => ({
         ...product,
-        id: String(product.id), // Convertir a cadena
+        id: String(product.id),
       }));
       setProducts(normalizedProducts);
-      localStorage.setItem('products', JSON.stringify(normalizedProducts)); // Guardar en Local Storage
+      localStorage.setItem('products', JSON.stringify(normalizedProducts));
     }
-  }, []); // Array vacío asegura que se ejecute solo una vez
 
-  const saveToLocalStorage = (products) => {
+    setUsers(storedUsers);
+  }, []);
+
+  // Guardar productos en localStorage
+  const saveProductsToLocalStorage = (products) => {
     localStorage.setItem('products', JSON.stringify(products));
   };
 
-  const handleInputChange = (e) => {
+  // Guardar usuarios en localStorage
+  const saveUsersToLocalStorage = (users) => {
+    localStorage.setItem('users', JSON.stringify(users));
+  };
+
+  // Manejar cambio de campos en el formulario de productos
+  const handleProductInputChange = (e) => {
     const { name, value } = e.target;
     setNewProduct({ ...newProduct, [name]: value });
   };
 
-  const handleFileChange = (e) => {
-    const file = e.target.files[0];
-    if (file && (file.type === 'image/png' || file.type === 'image/jpeg')) {
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        setNewProduct({ ...newProduct, imagen: reader.result });
-      };
-      reader.readAsDataURL(file); // Leer el archivo como base64
-    } else {
-      alert('Solo se permiten archivos PNG o JPG.');
-    }
+  // Manejar cambio de campos en el formulario de usuarios
+  const handleUserInputChange = (e) => {
+    const { name, value } = e.target;
+    setNewUser({ ...newUser, [name]: value });
   };
 
+  // Manejar cambio de archivo de imagen
+const handleFileChange = (e) => {
+  const file = e.target.files[0];
+  if (file && (file.type === 'image/png' || file.type === 'image/jpeg')) {
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      setNewProduct({ ...newProduct, imagen: reader.result });
+    };
+    reader.readAsDataURL(file); // Leer el archivo como base64
+  } else {
+    alert('Solo se permiten archivos PNG o JPG.');
+  }
+};
+
+
+  // Función para agregar o editar productos
   const handleAddProduct = (e) => {
     e.preventDefault();
     if (!newProduct.nombre || !newProduct.precio || !newProduct.imagen) {
@@ -62,51 +91,109 @@ const Admin = () => {
     if (currentProductId === null) {
       // Crear un nuevo producto
       const nextId = products.length > 0 ? String(Math.max(...products.map((p) => Number(p.id))) + 1) : "1";
-      const newProductWithId = { ...newProduct, id: nextId }; // Convertir el ID a String
+      const newProductWithId = { ...newProduct, id: nextId };
 
       const updatedProducts = [...products, newProductWithId];
-      setProducts(updatedProducts); // Actualizar estado
-      saveToLocalStorage(updatedProducts); // Guardar en Local Storage
+      setProducts(updatedProducts);
+      saveProductsToLocalStorage(updatedProducts);
     } else {
       // Editar un producto existente
       const updatedProducts = products.map((product) =>
         product.id === currentProductId ? { ...newProduct, id: currentProductId } : product
       );
-      setProducts(updatedProducts); // Actualizar estado
-      saveToLocalStorage(updatedProducts); // Guardar en Local Storage
+      setProducts(updatedProducts);
+      saveProductsToLocalStorage(updatedProducts);
     }
 
     // Restablecer estados y cerrar formulario
     setNewProduct({ id: '', nombre: '', precio: '', descripcion: '', imagen: '' });
     setCurrentProductId(null);
-    setShowForm(false);
+    setShowProductForm(false);
   };
 
+  // Función para agregar o editar usuarios
+  const handleAddUser = (e) => {
+    e.preventDefault();
+    if (!newUser.username || !newUser.password) {
+      alert('Por favor completa todos los campos.');
+      return;
+    }
+
+    if (currentUserId === null) {
+      // Crear un nuevo usuario
+      const nextId = users.length > 0 ? String(Math.max(...users.map((u) => Number(u.id))) + 1) : "1";
+      const newUserWithId = { ...newUser, id: nextId };
+
+      const updatedUsers = [...users, newUserWithId];
+      setUsers(updatedUsers);
+      saveUsersToLocalStorage(updatedUsers);
+    } else {
+      // Editar un usuario existente
+      const updatedUsers = users.map((user) =>
+        user.id === currentUserId ? { ...newUser, id: currentUserId } : user
+      );
+      setUsers(updatedUsers);
+      saveUsersToLocalStorage(updatedUsers);
+    }
+
+    // Restablecer estados y cerrar formulario
+    setNewUser({ id: '', username: '', password: '', role: 'user' });
+    setCurrentUserId(null);
+    setShowUserForm(false);
+  };
+
+  // Función para editar un producto
   const handleEditProduct = (product) => {
-    setCurrentProductId(product.id); // No es necesario convertir a número ya que ahora es String
-    setNewProduct(product); // Cargar los datos del producto seleccionado en el formulario
-    setShowForm(true);
+    setCurrentProductId(product.id);
+    setNewProduct(product);
+    setShowProductForm(true);
   };
 
+  // Función para eliminar un producto
   const handleDeleteProduct = (id) => {
     const confirmDelete = window.confirm('¿Estás seguro de eliminar este producto?');
-    if (!confirmDelete) return;
+    if (confirmDelete) {
+      const updatedProducts = products.filter((product) => product.id !== id);
+      setProducts(updatedProducts);
+      saveProductsToLocalStorage(updatedProducts);
+    }
+  };
 
-    const updatedProducts = products.filter((product) => product.id !== id);
-    setProducts(updatedProducts); // Actualizar estado
-    saveToLocalStorage(updatedProducts); // Guardar en Local Storage
+  // Función para eliminar un usuario
+const handleDeleteUser = (id) => {
+  if (id == "1") {
+    alert("No se puede eliminar el usuario con ID = 1 (admin).");
+    return;
+  }
+
+  const confirmDelete = window.confirm('¿Estás seguro de eliminar este usuario?');
+  if (confirmDelete) {
+    const updatedUsers = users.filter((user) => user.id !== id);
+    setUsers(updatedUsers);
+    saveUsersToLocalStorage(updatedUsers);
+  }
+};
+
+
+  // Función para editar un usuario
+  const handleEditUser = (user) => {
+    setCurrentUserId(user.id);
+    setNewUser(user);
+    setShowUserForm(true);
   };
 
   return (
     <>
-      <Header /> {/* Incluye el Header */}
+      <Header />
       <div className="container my-4">
         <h1>Dashboard de Administrador</h1>
+
+        {/* Botón para añadir un producto */}
         <button
           className="btn btn-success mb-3"
           onClick={() => {
-            setShowForm(true);
-            setCurrentProductId(null); // Asegurarse de que no se esté editando ningún producto
+            setShowProductForm(true);
+            setCurrentProductId(null);
             setNewProduct({ id: '', nombre: '', precio: '', descripcion: '', imagen: '' });
           }}
         >
@@ -114,7 +201,7 @@ const Admin = () => {
         </button>
 
         {/* Formulario para agregar o editar productos */}
-        {showForm && (
+        {showProductForm && (
           <form onSubmit={handleAddProduct} className="mb-4 border p-3">
             <h2>{currentProductId === null ? 'Crear Producto' : 'Editar Producto'}</h2>
             <div className="mb-3">
@@ -124,7 +211,7 @@ const Admin = () => {
                 className="form-control"
                 name="nombre"
                 value={newProduct.nombre}
-                onChange={handleInputChange}
+                onChange={handleProductInputChange}
               />
             </div>
             <div className="mb-3">
@@ -134,7 +221,7 @@ const Admin = () => {
                 className="form-control"
                 name="precio"
                 value={newProduct.precio}
-                onChange={handleInputChange}
+                onChange={handleProductInputChange}
               />
             </div>
             <div className="mb-3">
@@ -144,7 +231,7 @@ const Admin = () => {
                 className="form-control"
                 name="descripcion"
                 value={newProduct.descripcion}
-                onChange={handleInputChange}
+                onChange={handleProductInputChange}
               />
             </div>
             <div className="mb-3">
@@ -161,7 +248,7 @@ const Admin = () => {
             <button
               type="button"
               className="btn btn-secondary mx-2"
-              onClick={() => setShowForm(false)}
+              onClick={() => setShowProductForm(false)}
             >
               Cancelar
             </button>
@@ -169,6 +256,7 @@ const Admin = () => {
         )}
 
         {/* Tabla de productos */}
+        <h2>Productos</h2>
         <table className="table table-striped">
           <thead>
             <tr>
@@ -214,12 +302,106 @@ const Admin = () => {
             ))}
           </tbody>
         </table>
-      </div>
-      <br></br>
-      <br></br>
-      <br></br>
 
-      <Footer /> {/* Incluye el Footer */}
+        {/* Botón para añadir un usuario */}
+        <button
+          className="btn btn-success mb-3"
+          onClick={() => {
+            setShowUserForm(true);
+            setCurrentUserId(null);
+            setNewUser({ id: '', username: '', password: '', role: 'user' });
+          }}
+        >
+          Añadir Usuario
+        </button>
+
+        {/* Formulario para agregar o editar usuarios */}
+        {showUserForm && (
+          <form onSubmit={handleAddUser} className="mb-4 border p-3">
+            <h2>{currentUserId === null ? 'Crear Usuario' : 'Editar Usuario'}</h2>
+            <div className="mb-3">
+              <label className="form-label">Username</label>
+              <input
+                type="text"
+                className="form-control"
+                name="username"
+                value={newUser.username}
+                onChange={handleUserInputChange}
+              />
+            </div>
+            <div className="mb-3">
+              <label className="form-label">Password</label>
+              <input
+                type="password"
+                className="form-control"
+                name="password"
+                value={newUser.password}
+                onChange={handleUserInputChange}
+              />
+            </div>
+            <div className="mb-3">
+              <label className="form-label">Role</label>
+              <select
+                className="form-control"
+                name="role"
+                value={newUser.role}
+                onChange={handleUserInputChange}
+              >
+                <option value="user">User</option>
+                <option value="admin">Admin</option>
+              </select>
+            </div>
+            <button type="submit" className="btn btn-primary">
+              {currentUserId === null ? 'Guardar' : 'Actualizar'}
+            </button>
+            <button
+              type="button"
+              className="btn btn-secondary mx-2"
+              onClick={() => setShowUserForm(false)}
+            >
+              Cancelar
+            </button>
+          </form>
+        )}
+
+        {/* Tabla de usuarios */}
+        <h2>Usuarios</h2>
+        <table className="table table-striped mb-5">
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>Username</th>
+              <th>Role</th>
+              <th>Acciones</th>
+            </tr>
+          </thead>
+          <tbody>
+            {users.map((user) => (
+              <tr key={user.id}>
+                <td>{user.id}</td>
+                <td>{user.username}</td>
+                <td>{user.role}</td>
+                <td>
+                  <button
+                    className="btn btn-primary btn-sm mx-1"
+                    onClick={() => handleEditUser(user)}
+                  >
+                    Editar
+                  </button>
+                  <button
+                    className="btn btn-danger btn-sm mx-1"
+                    onClick={() => handleDeleteUser(user.id)}
+                  >
+                    Eliminar
+                  </button>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+        <br></br>
+      </div>
+      <Footer />
     </>
   );
 };

@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { useAuth } from '../context/AuthContext';
+import { useAuth } from '../context/AuthContext'; // Importa el contexto de autenticación
 import { useNavigate } from 'react-router-dom';
 import Header from '../components/Header'; // Importa el Header
 import Footer from '../components/Footer'; // Importa el Footer
@@ -8,16 +8,30 @@ const Login = () => {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
-  const { login } = useAuth();
+  const [isRegistering, setIsRegistering] = useState(false); // Estado para cambiar entre Login y Registro
+  const { login, register } = useAuth();
   const navigate = useNavigate();
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    const success = login(username, password);
-    if (success) {
-      navigate('/'); // Redirige al inicio
+
+    if (isRegistering) {
+      // Registro de nuevo usuario
+      const success = register(username, password);
+      if (success) {
+        setError('');
+        setIsRegistering(false);
+      } else {
+        setError('El usuario ya existe');
+      }
     } else {
-      setError('Usuario o contraseña incorrectos');
+      // Login
+      const success = login(username, password);
+      if (success) {
+        navigate('/'); // Redirige al inicio
+      } else {
+        setError('Usuario o contraseña incorrectos');
+      }
     }
   };
 
@@ -25,7 +39,7 @@ const Login = () => {
     <>
       <Header /> {/* Incluye el Header */}
       <div className="container my-4">
-        <h1>Iniciar Sesión</h1>
+        <h1>{isRegistering ? 'Registrar Usuario' : 'Iniciar Sesión'}</h1>
         <form onSubmit={handleSubmit}>
           <div className="mb-3">
             <label htmlFor="username" className="form-label">Usuario</label>
@@ -48,8 +62,19 @@ const Login = () => {
             />
           </div>
           {error && <p className="text-danger">{error}</p>}
-          <button type="submit" className="btn btn-primary">Iniciar Sesión</button>
+          <button type="submit" className="btn btn-primary">
+            {isRegistering ? 'Registrar' : 'Iniciar Sesión'}
+          </button>
         </form>
+        <p className="mt-3">
+          {isRegistering ? '¿Ya tienes cuenta? ' : '¿No tienes cuenta? '}
+          <button
+            onClick={() => setIsRegistering(!isRegistering)}
+            className="btn btn-link"
+          >
+            {isRegistering ? 'Iniciar Sesión' : 'Registrar'}
+          </button>
+        </p>
       </div>
       <Footer /> {/* Incluye el Footer */}
     </>
@@ -57,3 +82,5 @@ const Login = () => {
 };
 
 export default Login;
+
+

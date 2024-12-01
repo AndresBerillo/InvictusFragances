@@ -1,48 +1,84 @@
-import React, { createContext, useState, useContext, useEffect } from 'react';
-import users from '../data/users.json';
+import { createContext, useContext, useState, useEffect } from 'react';
 
+// Crear contexto
 const AuthContext = createContext();
 
+// Proveedor de contexto
 export const AuthProvider = ({ children }) => {
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [currentUser, setCurrentUser] = useState(null);
-  const [isLoading, setIsLoading] = useState(true); // Nuevo estado para rastrear la carga inicial
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
 
-  // Cargar estado de autenticación desde localStorage al montar el componente
   useEffect(() => {
-    const storedUser = localStorage.getItem('currentUser');
+    // Verificar si los usuarios ya están guardados en localStorage
+    const users = JSON.parse(localStorage.getItem('users')) || [];
+
+    if (users.length === 0) {
+      // Si no hay usuarios, inicializar con el usuario admin
+      const defaultAdmin = {
+        id: 1,
+        username: 'admin',
+        password: 'admin123',
+        role: 'admin',
+      };
+      users.push(defaultAdmin);
+      localStorage.setItem('users', JSON.stringify(users)); // Guardar en localStorage
+    }
+
+    // Verificar si ya hay un usuario autenticado
+    const storedUser = JSON.parse(localStorage.getItem('currentUser'));
     if (storedUser) {
-      setCurrentUser(JSON.parse(storedUser));
+      setCurrentUser(storedUser);
       setIsAuthenticated(true);
     }
-    setIsLoading(false); // Marcar como cargado
   }, []);
 
+  // Función para iniciar sesión
   const login = (username, password) => {
-    const user = users.find(
-      (u) => u.username === username && u.password === password
-    );
+    const users = JSON.parse(localStorage.getItem('users')) || []; // Cargar usuarios
+    const user = users.find(user => user.username === username && user.password === password);
+
     if (user) {
-      setIsAuthenticated(true);
       setCurrentUser(user);
-      localStorage.setItem('currentUser', JSON.stringify(user)); // Guardar usuario en localStorage
-      return true; // Login exitoso
+      setIsAuthenticated(true);
+      localStorage.setItem('currentUser', JSON.stringify(user)); // Guardar el usuario actual en localStorage
+      return true;
+    } else {
+      return false;
     }
-    return false; // Credenciales incorrectas
   };
 
+  // Función para registrar un nuevo usuario
+  const register = (username, password) => {
+    const users = JSON.parse(localStorage.getItem('users')) || []; // Cargar usuarios
+    const existingUser = users.find(user => user.username === username);
+
+    if (!existingUser) {
+      const newUser = { id: users.length + 1, username, password, role: 'user' };
+      users.push(newUser);
+      localStorage.setItem('users', JSON.stringify(users)); // Guardar los usuarios actualizados
+      return true;
+    }
+    return false;
+  };
+
+  // Función para cerrar sesión
   const logout = () => {
-    setIsAuthenticated(false);
+    localStorage.removeItem('currentUser');
     setCurrentUser(null);
-    localStorage.removeItem('currentUser'); // Eliminar usuario del localStorage
+    setIsAuthenticated(false);
   };
 
   return (
-    <AuthContext.Provider value={{ isAuthenticated, currentUser, login, logout, isLoading }}>
+    <AuthContext.Provider value={{ currentUser, isAuthenticated, login, logout, register }}>
       {children}
     </AuthContext.Provider>
   );
 };
 
-export const useAuth = () => useContext(AuthContext);
+// Hook para acceder al contexto
+export const useAuth = () => {
+  return useContext(AuthContext);
+};
+
+
 

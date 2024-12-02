@@ -31,7 +31,7 @@ Un completo sistema **CRUD** para usuarios, que permite:
 
 El objetivo de nuestra aplicación es ofrecer una solución digital práctica y sencilla que facilite la gestión de una perfumería. Queremos mejorar la experiencia de compra de los clientes y, al mismo tiempo, simplificar las tareas administrativas.
 
-## Usuarios ya creados para testeo
+## Usuario ya creado para testeo
 ```json
 [
   {
@@ -39,11 +39,5 @@ El objetivo de nuestra aplicación es ofrecer una solución digital práctica y 
     "username": "admin",
     "password": "admin123",
     "role": "admin"
-  },
-  {
-    "id": 2,
-    "username": "user",
-    "password": "user123",
-    "role": "user"
   }
 ]

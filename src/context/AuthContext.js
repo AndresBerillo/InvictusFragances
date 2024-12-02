@@ -1,15 +1,12 @@
 import { createContext, useContext, useState, useEffect } from 'react';
 
-// Crear contexto
 const AuthContext = createContext();
 
-// Proveedor de contexto
 export const AuthProvider = ({ children }) => {
   const [currentUser, setCurrentUser] = useState(null);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
 
   useEffect(() => {
-    // Verificar si los usuarios ya están guardados en localStorage
     const users = JSON.parse(localStorage.getItem('users')) || [];
 
     if (users.length === 0) {
@@ -40,14 +37,14 @@ export const AuthProvider = ({ children }) => {
     if (user) {
       setCurrentUser(user);
       setIsAuthenticated(true);
-      localStorage.setItem('currentUser', JSON.stringify(user)); // Guardar el usuario actual en localStorage
+      localStorage.setItem('currentUser', JSON.stringify(user));
       return true;
     } else {
       return false;
     }
   };
 
-  // Función para registrar un nuevo usuario
+  // registrar un nuevo usuario
   const register = (username, password) => {
     const users = JSON.parse(localStorage.getItem('users')) || []; // Cargar usuarios
     const existingUser = users.find(user => user.username === username);
@@ -61,7 +58,7 @@ export const AuthProvider = ({ children }) => {
     return false;
   };
 
-  // Función para cerrar sesión
+  // ccerrar sesión
   const logout = () => {
     localStorage.removeItem('currentUser');
     setCurrentUser(null);

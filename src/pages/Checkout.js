@@ -4,10 +4,9 @@ import Header from '../components/Header';
 import Footer from '../components/Footer';
 
 const Checkout = () => {
-  const { setCart } = useCart(); // Asegúrate de que setCart esté disponible
+  const { setCart } = useCart();
 
   useEffect(() => {
-    // Limpia el carrito al acceder a la página
     setCart([]);
   }, [setCart]);
 

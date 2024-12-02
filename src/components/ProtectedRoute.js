@@ -6,7 +6,7 @@ const ProtectedRoute = ({ children }) => {
   const { isAuthenticated, isLoading } = useAuth();
 
   if (isLoading) {
-    // Mostrar un indicador de carga mientras se verifica la autenticación
+    // muestra indicador de carga mientras se verifica la autenticación
     return <div>Cargando...</div>;
   }
 

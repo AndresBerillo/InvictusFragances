@@ -2,8 +2,8 @@ import React from 'react';
 import { useCart } from '../context/CartContext';
 import { useParams, useNavigate } from 'react-router-dom';
 import perfumes from '../data/data.json';
-import Header from '../components/Header'; // Importa el Header
-import Footer from '../components/Footer'; // Importa el Footer
+import Header from '../components/Header';
+import Footer from '../components/Footer';
 
 const ProductDetails = () => {
   const { id } = useParams(); // ID recibido desde la URL como string
@@ -30,8 +30,8 @@ const ProductDetails = () => {
         <button
           className="btn btn-primary mt-3"
           onClick={() => {
-            addToCart(product); // Añadir al carrito
-            navigate('/cart'); // Redirigir al carrito
+            addToCart(product);
+            navigate('/cart');
           }}
         >
           Añadir al carrito

@@ -1,16 +1,24 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { useAuth } from '../context/AuthContext'; // Importa el contexto de autenticación
+import { useAuth } from '../context/AuthContext';
 
 const Header = () => {
-  const { isAuthenticated, currentUser, logout } = useAuth(); // Usa el contexto
+  const { isAuthenticated, currentUser, logout } = useAuth();
 
   return (
     <nav className="navbar navbar-expand-lg navbar-dark bg-dark shadow-sm">
       <div className="container">
-        {/* Logo y nombre del sitio */}
+        {/* Logo y nombre de la pag */}
         <Link className="navbar-brand fw-bold" to="/">
-          Perfumes
+          <img
+            src="/perfumeria2.png"
+            alt="logo"
+            style={{ height: '60px', width: 'auto' }}
+          />
+        </Link>
+
+        <Link className="navbar-brand fw-bold" to="/">
+          Perfumería Invictus
         </Link>
 
         {/* Botón para el menú en pantallas pequeñas */}
@@ -45,11 +53,8 @@ const Header = () => {
               </li>
             ) : (
               <>
-                {/* Mensaje de bienvenida */}
+              
                 <li className="nav-item d-flex align-items-center">
-                  <span className="nav-link text-white">
-                    Hola, <strong>{currentUser?.username || 'Invitado'}</strong>
-                  </span>
                   {/* Botón para ir al carrito */}
                   <Link className="btn btn-outline-warning px-3 mx-2" to="/cart">
                     🛒 Carrito
@@ -64,6 +69,13 @@ const Header = () => {
                     </Link>
                   </li>
                 )}
+                
+                {/* Mensaje de bienvenida */}
+                <li className="nav-item d-flex align-items-center">
+                  <span className="nav-link text-white">
+                    Hola, <strong>{currentUser?.username || 'Invitado'}</strong>
+                  </span>
+                </li>
 
                 {/* Cerrar Sesión */}
                 <li className="nav-item">

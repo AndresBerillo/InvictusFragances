@@ -1,11 +1,11 @@
 import React from 'react';
 import { useCart } from '../context/CartContext';
 import { useNavigate } from 'react-router-dom';
-import Header from '../components/Header'; // Importa el Header
-import Footer from '../components/Footer'; // Importa el Footer
+import Header from '../components/Header';
+import Footer from '../components/Footer';
 
 const Cart = () => {
-  const { cart, removeFromCart } = useCart(); // Obtener productos del carrito y función para eliminar
+  const { cart, removeFromCart } = useCart(); 
   const navigate = useNavigate();
 
   return (
@@ -58,7 +58,7 @@ const Cart = () => {
             </table>
             <button
               className="btn btn-primary"
-              onClick={() => navigate('/checkout')} // Ir a la vista de checkout
+              onClick={() => navigate('/checkout')}
             >
               Proceder al pago
             </button>

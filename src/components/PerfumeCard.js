@@ -7,7 +7,7 @@ const PerfumeCard = ({ perfumeId }) => {
   const navigate = useNavigate();
   const [perfume, setPerfume] = useState(null);
 
-  // Obtener la información del perfume desde Local Storage
+  // obtiene info del perfume desde Local Storage
   useEffect(() => {
     const storedProducts = JSON.parse(localStorage.getItem('products')) || [];
     const product = storedProducts.find((item) => item.id === perfumeId);
@@ -23,7 +23,7 @@ const PerfumeCard = ({ perfumeId }) => {
     }
   };
 
-  // Mostrar un mensaje si el perfume no se encuentra
+  // muestra mensaje si el perfume no se encuentra
   if (!perfume) {
     return <p>Producto no encontrado.</p>;
   }

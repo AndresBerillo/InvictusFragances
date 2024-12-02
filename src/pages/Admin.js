@@ -24,7 +24,11 @@ const Admin = () => {
   const [showProductForm, setShowProductForm] = useState(false);
   const [showUserForm, setShowUserForm] = useState(false);
 
-  // Cargar datos desde Local Storage para productos y usuarios
+  useEffect(() => {
+    document.title = 'Admin - Dashboard';
+  }, []);
+
+  // carga datos desde Local Storage para productos y usuarios
   useEffect(() => {
     const storedProducts = JSON.parse(localStorage.getItem('products'));
     const storedUsers = JSON.parse(localStorage.getItem('users')) || [];
@@ -43,12 +47,12 @@ const Admin = () => {
     setUsers(storedUsers);
   }, []);
 
-  // Guardar productos en localStorage
+  // guarda productos en localStorage
   const saveProductsToLocalStorage = (products) => {
     localStorage.setItem('products', JSON.stringify(products));
   };
 
-  // Guardar usuarios en localStorage
+  // guarda usuarios en localStorage
   const saveUsersToLocalStorage = (users) => {
     localStorage.setItem('users', JSON.stringify(users));
   };
@@ -80,7 +84,7 @@ const handleFileChange = (e) => {
 };
 
 
-  // Función para agregar o editar productos
+  // agregar o editar productos
   const handleAddProduct = (e) => {
     e.preventDefault();
     if (!newProduct.nombre || !newProduct.precio || !newProduct.imagen) {
@@ -142,14 +146,14 @@ const handleFileChange = (e) => {
     setShowUserForm(false);
   };
 
-  // Función para editar un producto
+  // editar un producto
   const handleEditProduct = (product) => {
     setCurrentProductId(product.id);
     setNewProduct(product);
     setShowProductForm(true);
   };
 
-  // Función para eliminar un producto
+  // eliminar un producto
   const handleDeleteProduct = (id) => {
     const confirmDelete = window.confirm('¿Estás seguro de eliminar este producto?');
     if (confirmDelete) {
@@ -159,7 +163,7 @@ const handleFileChange = (e) => {
     }
   };
 
-  // Función para eliminar un usuario
+  // eliminar un usuario
 const handleDeleteUser = (id) => {
   if (id == "1") {
     alert("No se puede eliminar el usuario con ID = 1 (admin).");
@@ -175,7 +179,7 @@ const handleDeleteUser = (id) => {
 };
 
 
-  // Función para editar un usuario
+  // editar un usuario
   const handleEditUser = (user) => {
     setCurrentUserId(user.id);
     setNewUser(user);
@@ -320,7 +324,7 @@ const handleDeleteUser = (id) => {
           <form onSubmit={handleAddUser} className="mb-4 border p-3">
             <h2>{currentUserId === null ? 'Crear Usuario' : 'Editar Usuario'}</h2>
             <div className="mb-3">
-              <label className="form-label">Username</label>
+              <label className="form-label">Usuario</label>
               <input
                 type="text"
                 className="form-control"
@@ -330,7 +334,7 @@ const handleDeleteUser = (id) => {
               />
             </div>
             <div className="mb-3">
-              <label className="form-label">Password</label>
+              <label className="form-label">Contraseña</label>
               <input
                 type="password"
                 className="form-control"
@@ -340,14 +344,14 @@ const handleDeleteUser = (id) => {
               />
             </div>
             <div className="mb-3">
-              <label className="form-label">Role</label>
+              <label className="form-label">Rol</label>
               <select
                 className="form-control"
                 name="role"
                 value={newUser.role}
                 onChange={handleUserInputChange}
               >
-                <option value="user">User</option>
+                <option value="user">Usuario</option>
                 <option value="admin">Admin</option>
               </select>
             </div>
@@ -370,8 +374,8 @@ const handleDeleteUser = (id) => {
           <thead>
             <tr>
               <th>ID</th>
-              <th>Username</th>
-              <th>Role</th>
+              <th>Usuario</th>
+              <th>Rol</th>
               <th>Acciones</th>
             </tr>
           </thead>

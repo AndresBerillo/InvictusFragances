@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
-import { useAuth } from '../context/AuthContext'; // Importa el contexto de autenticación
+import { useAuth } from '../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
-import Header from '../components/Header'; // Importa el Header
-import Footer from '../components/Footer'; // Importa el Footer
+import Header from '../components/Header';
+import Footer from '../components/Footer';
 
 const Login = () => {
   const [username, setUsername] = useState('');

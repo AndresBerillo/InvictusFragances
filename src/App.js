@@ -4,8 +4,8 @@ import Home from './pages/Home';
 import Login from './pages/Login';
 import ProductDetails from './pages/ProductDetails';
 import Admin from './pages/Admin';
-import Cart from './pages/Cart'; // Importa la página Cart
-import Checkout from './pages/Checkout'; // Importa Checkout
+import Cart from './pages/Cart';
+import Checkout from './pages/Checkout';
 import ProtectedRoute from './components/ProtectedRoute';
 
 function App() {
@@ -34,8 +34,22 @@ function App() {
                 </ProtectedRoute>
               }
             />
-            <Route path="/cart" element={<Cart />} />
-            <Route path="/checkout" element={<Checkout />} />
+            <Route
+              path="/cart"
+              element={
+                <ProtectedRoute>
+                  <Cart />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/checkout"
+              element={
+                <ProtectedRoute>
+                  <Checkout />
+                </ProtectedRoute>
+              }
+            />
           </Routes>
         </>
       </Router>

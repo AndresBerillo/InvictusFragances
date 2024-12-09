@@ -5,12 +5,13 @@ import Header from '../components/Header';
 import Footer from '../components/Footer';
 
 const ProductDetails = () => {
-  const { id } = useParams(); // ID recibido desde la URL
+  const { id } = useParams();
   const { addToCart } = useCart();
   const navigate = useNavigate();
-  const [product, setProduct] = useState(null); // Estado para el producto
-  const [loading, setLoading] = useState(true); // Estado de carga
-  const [error, setError] = useState(null); // Estado para errores
+  const [product, setProduct] = useState(null);
+  const [quantity, setQuantity] = useState(1); // Cantidad seleccionada
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
   useEffect(() => {
     const fetchProduct = async () => {
@@ -20,7 +21,7 @@ const ProductDetails = () => {
           throw new Error('Producto no encontrado');
         }
         const data = await response.json();
-        setProduct(data); // Actualiza el estado con el producto
+        setProduct(data);
       } catch (err) {
         setError(err.message);
       } finally {
@@ -37,11 +38,11 @@ const ProductDetails = () => {
 
   return (
     <>
-      <Header /> {/* Añade el Header */}
+      <Header />
       <div className="container my-4">
-        <h1>{product.nombre}</h1> {/* Mostrar nombre del producto */}
-        <p>{product.descripcion}</p> {/* Mostrar descripción */}
-        <p>Precio: ${product.precio}</p> {/* Mostrar precio */}
+        <h1>{product.nombre}</h1>
+        <p>{product.descripcion}</p>
+        <p>Precio: ${product.precio}</p>
         {product.imagen && (
           <img
             src={`http://localhost:8088${product.imagen}`}
@@ -49,17 +50,29 @@ const ProductDetails = () => {
             style={{ width: '300px', height: '300px', objectFit: 'cover' }}
           />
         )}
+        <div className="mt-3">
+          <label htmlFor="quantity">Cantidad:</label>
+          <input
+            type="number"
+            id="quantity"
+            min="1"
+            value={quantity}
+            onChange={(e) => setQuantity(parseInt(e.target.value, 10))}
+            className="form-control"
+            style={{ width: '100px', display: 'inline-block', marginLeft: '10px' }}
+          />
+        </div>
         <button
           className="btn btn-primary mt-3"
           onClick={() => {
-            addToCart(product);
+            addToCart(product, quantity);
             navigate('/cart');
           }}
         >
           Añadir al carrito
         </button>
       </div>
-      <Footer /> {/* Añade el Footer */}
+      <Footer />
     </>
   );
 };

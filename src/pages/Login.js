@@ -12,12 +12,11 @@ const Login = () => {
   const { login, register } = useAuth();
   const navigate = useNavigate();
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-
+  
     if (isRegistering) {
-      // Registro de nuevo usuario
-      const success = register(username, password);
+      const success = await register(username, password);
       if (success) {
         setError('');
         setIsRegistering(false);
@@ -25,8 +24,7 @@ const Login = () => {
         setError('El usuario ya existe');
       }
     } else {
-      // Login
-      const success = login(username, password);
+      const success = await login(username, password);
       if (success) {
         navigate('/'); // Redirige al inicio
       } else {

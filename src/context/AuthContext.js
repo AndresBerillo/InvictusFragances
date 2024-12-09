@@ -7,59 +7,58 @@ export const AuthProvider = ({ children }) => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
 
   useEffect(() => {
-    const users = JSON.parse(localStorage.getItem('users')) || [];
+    const token = localStorage.getItem('token');
+    const user = JSON.parse(localStorage.getItem('currentUser'));
 
-    if (users.length === 0) {
-      // Si no hay usuarios, inicializar con el usuario admin
-      const defaultAdmin = {
-        id: 1,
-        username: 'admin',
-        password: 'admin123',
-        role: 'admin',
-      };
-      users.push(defaultAdmin);
-      localStorage.setItem('users', JSON.stringify(users)); // Guardar en localStorage
-    }
-
-    // Verificar si ya hay un usuario autenticado
-    const storedUser = JSON.parse(localStorage.getItem('currentUser'));
-    if (storedUser) {
-      setCurrentUser(storedUser);
+    if (token && user) {
+      setCurrentUser(user);
       setIsAuthenticated(true);
     }
   }, []);
 
   // Función para iniciar sesión
-  const login = (username, password) => {
-    const users = JSON.parse(localStorage.getItem('users')) || []; // Cargar usuarios
-    const user = users.find(user => user.username === username && user.password === password);
+  const login = async (username, password) => {
+    try {
+      const response = await fetch('http://localhost:8088/api/users/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ username, password }),
+      });
 
-    if (user) {
-      setCurrentUser(user);
+      if (!response.ok) throw new Error('Usuario o contraseña incorrectos');
+      const data = await response.json();
+
+      localStorage.setItem('token', data.token);
+      localStorage.setItem('currentUser', JSON.stringify(data.user));
+      setCurrentUser(data.user);
       setIsAuthenticated(true);
-      localStorage.setItem('currentUser', JSON.stringify(user));
       return true;
-    } else {
+    } catch (error) {
+      console.error(error.message);
       return false;
     }
   };
 
-  // registrar un nuevo usuario
-  const register = (username, password) => {
-    const users = JSON.parse(localStorage.getItem('users')) || []; // Cargar usuarios
-    const existingUser = users.find(user => user.username === username);
+  // Función para registrar usuario
+  const register = async (username, password) => {
+    try {
+      const response = await fetch('http://localhost:8088/api/users/register', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ username, password }),
+      });
 
-    if (!existingUser) {
-      const newUser = { id: users.length + 1, username, password, role: 'user' };
-      users.push(newUser);
-      localStorage.setItem('users', JSON.stringify(users)); // Guardar los usuarios actualizados
+      if (!response.ok) throw new Error('Error al registrar el usuario');
       return true;
+    } catch (error) {
+      console.error(error.message);
+      return false;
     }
-    return false;
   };
 
-  // ccerrar sesión
+  // Función para cerrar sesión
   const logout = () => {
+    localStorage.removeItem('token');
     localStorage.removeItem('currentUser');
     setCurrentUser(null);
     setIsAuthenticated(false);
@@ -72,10 +71,7 @@ export const AuthProvider = ({ children }) => {
   );
 };
 
-// Hook para acceder al contexto
 export const useAuth = () => {
   return useContext(AuthContext);
 };
-
-
 

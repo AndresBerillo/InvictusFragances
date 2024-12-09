@@ -32,15 +32,15 @@ const Cart = () => {
                       {product.nombre}
                       {product.imagen && (
                         <img
-                          src={product.imagen}
-                          alt={product.nombre}
-                          style={{
-                            width: '50px',
-                            height: '50px',
-                            objectFit: 'cover',
-                            marginLeft: '10px',
-                          }}
-                        />
+                        src={`http://localhost:8088${product.imagen}`}
+                        alt={product.nombre}
+                        style={{
+                          width: '50px',
+                          height: '50px',
+                          objectFit: 'cover',
+                          marginLeft: '10px',
+                        }}
+                      />
                       )}
                     </td>
                     <td>${product.precio}</td>

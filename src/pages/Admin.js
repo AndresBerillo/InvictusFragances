@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import Header from '../components/Header';
 import Footer from '../components/Footer';
 
@@ -21,15 +21,9 @@ const Admin = () => {
   const [showProductForm, setShowProductForm] = useState(false);
   const [showUserForm, setShowUserForm] = useState(false);
 
-  useEffect(() => {
-    document.title = 'Admin - Dashboard';
-    fetchProducts();
-    fetchUsers();
-  }, []);
-
   const token = localStorage.getItem('token');
 
-  const fetchProducts = async () => {
+  const fetchProducts = useCallback(async () => {
     try {
       const response = await fetch('http://localhost:8088/api/perfumes');
       const data = await response.json();
@@ -37,9 +31,9 @@ const Admin = () => {
     } catch (error) {
       console.error('Error al cargar productos:', error);
     }
-  };
+  }, []);
 
-  const fetchUsers = async () => {
+  const fetchUsers = useCallback(async () => {
     try {
       const response = await fetch('http://localhost:8088/api/users', {
         headers: {
@@ -51,7 +45,13 @@ const Admin = () => {
     } catch (error) {
       console.error('Error al cargar usuarios:', error);
     }
-  };
+  }, [token]);
+
+  useEffect(() => {
+    document.title = 'Admin - Dashboard';
+    fetchProducts();
+    fetchUsers();
+  }, [fetchProducts, fetchUsers]);
 
   const handleProductInputChange = (e) => {
     const { name, value } = e.target;

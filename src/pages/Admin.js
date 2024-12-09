@@ -133,40 +133,48 @@ const Admin = () => {
 
   const handleAddUser = async (e) => {
     e.preventDefault();
-  
-    if (!newUser.username || !newUser.password) {
+
+    if (!newUser.username || (!currentUserId && !newUser.password)) {
       alert('Por favor completa todos los campos.');
       return;
     }
-  
-    const token = localStorage.getItem('token');
-    if (!token) {
-      alert('Por favor, inicia sesión para realizar esta acción.');
-      return;
-    }
-  
+
     try {
-      const response = await fetch('http://localhost:8088/api/users/register', {
-        method: 'POST',
+      const method = currentUserId ? 'PUT' : 'POST';
+      const url = currentUserId
+        ? `http://localhost:8088/api/users/${currentUserId}`
+        : 'http://localhost:8088/api/users/register';
+
+      const body = {
+        username: newUser.username,
+        role: newUser.role,
+      };
+
+      if (!currentUserId) {
+        body.password = newUser.password;
+      }
+
+      const response = await fetch(url, {
+        method,
         headers: {
           'Content-Type': 'application/json',
-          Authorization: `Bearer ${token}`, // Encabezado de autenticación
+          Authorization: `Bearer ${token}`,
         },
-        body: JSON.stringify(newUser),
+        body: JSON.stringify(body),
       });
-  
+
       if (!response.ok) {
         throw new Error('Error al guardar el usuario');
       }
-  
-      await fetchUsers(); // Refrescar la lista de usuarios
+
+      await fetchUsers();
       setNewUser({ username: '', password: '', role: 'user' });
       setCurrentUserId(null);
       setShowUserForm(false);
     } catch (error) {
       console.error('Error al guardar el usuario:', error);
     }
-  };  
+  };
 
   const handleEditProduct = (product) => {
     setCurrentProductId(product.id);
@@ -176,7 +184,7 @@ const Admin = () => {
 
   const handleEditUser = (user) => {
     setCurrentUserId(user.id);
-    setNewUser(user);
+    setNewUser({ username: user.username, password: '', role: user.role });
     setShowUserForm(true);
   };
 

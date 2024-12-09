@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from 'react';
-import perfumesData from '../data/data.json';
 import Header from '../components/Header';
 import Footer from '../components/Footer';
 
@@ -7,16 +6,14 @@ const Admin = () => {
   const [products, setProducts] = useState([]);
   const [users, setUsers] = useState([]);
   const [currentProductId, setCurrentProductId] = useState(null);
-  const [currentUserId, setCurrentUserId] = useState(null); // ID del usuario que se está editando
+  const [currentUserId, setCurrentUserId] = useState(null);
   const [newProduct, setNewProduct] = useState({
-    id: '',
     nombre: '',
     precio: '',
     descripcion: '',
     imagen: '',
   });
   const [newUser, setNewUser] = useState({
-    id: '',
     username: '',
     password: '',
     role: 'user',
@@ -26,164 +23,203 @@ const Admin = () => {
 
   useEffect(() => {
     document.title = 'Admin - Dashboard';
+    fetchProducts();
+    fetchUsers();
   }, []);
 
-  // carga datos desde Local Storage para productos y usuarios
-  useEffect(() => {
-    const storedProducts = JSON.parse(localStorage.getItem('products'));
-    const storedUsers = JSON.parse(localStorage.getItem('users')) || [];
+  const token = localStorage.getItem('token');
 
-    if (storedProducts) {
-      setProducts(storedProducts);
-    } else {
-      const normalizedProducts = perfumesData.perfumes.map((product) => ({
-        ...product,
-        id: String(product.id),
-      }));
-      setProducts(normalizedProducts);
-      localStorage.setItem('products', JSON.stringify(normalizedProducts));
+  const fetchProducts = async () => {
+    try {
+      const response = await fetch('http://localhost:8088/api/perfumes');
+      const data = await response.json();
+      setProducts(data);
+    } catch (error) {
+      console.error('Error al cargar productos:', error);
     }
-
-    setUsers(storedUsers);
-  }, []);
-
-  // guarda productos en localStorage
-  const saveProductsToLocalStorage = (products) => {
-    localStorage.setItem('products', JSON.stringify(products));
   };
 
-  // guarda usuarios en localStorage
-  const saveUsersToLocalStorage = (users) => {
-    localStorage.setItem('users', JSON.stringify(users));
+  const fetchUsers = async () => {
+    try {
+      const response = await fetch('http://localhost:8088/api/users', {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      const data = await response.json();
+      setUsers(data);
+    } catch (error) {
+      console.error('Error al cargar usuarios:', error);
+    }
   };
 
-  // Manejar cambio de campos en el formulario de productos
   const handleProductInputChange = (e) => {
     const { name, value } = e.target;
     setNewProduct({ ...newProduct, [name]: value });
   };
 
-  // Manejar cambio de campos en el formulario de usuarios
   const handleUserInputChange = (e) => {
     const { name, value } = e.target;
     setNewUser({ ...newUser, [name]: value });
   };
 
-  // Manejar cambio de archivo de imagen
-const handleFileChange = (e) => {
-  const file = e.target.files[0];
-  if (file && (file.type === 'image/png' || file.type === 'image/jpeg')) {
-    const reader = new FileReader();
-    reader.onloadend = () => {
-      setNewProduct({ ...newProduct, imagen: reader.result });
-    };
-    reader.readAsDataURL(file); // Leer el archivo como base64
-  } else {
-    alert('Solo se permiten archivos PNG o JPG.');
-  }
-};
-
-
-  // agregar o editar productos
-  const handleAddProduct = (e) => {
-    e.preventDefault();
-    if (!newProduct.nombre || !newProduct.precio || !newProduct.imagen) {
-      alert('Por favor completa todos los campos, incluida la imagen.');
+  const handleFileChange = async (e) => {
+    const file = e.target.files[0];
+    if (!file || (file.type !== 'image/png' && file.type !== 'image/jpeg')) {
+      alert('Solo se permiten archivos PNG o JPG.');
       return;
     }
 
-    if (currentProductId === null) {
-      // Crear un nuevo producto
-      const nextId = products.length > 0 ? String(Math.max(...products.map((p) => Number(p.id))) + 1) : "1";
-      const newProductWithId = { ...newProduct, id: nextId };
+    const formData = new FormData();
+    formData.append('imagen', file);
 
-      const updatedProducts = [...products, newProductWithId];
-      setProducts(updatedProducts);
-      saveProductsToLocalStorage(updatedProducts);
-    } else {
-      // Editar un producto existente
-      const updatedProducts = products.map((product) =>
-        product.id === currentProductId ? { ...newProduct, id: currentProductId } : product
-      );
-      setProducts(updatedProducts);
-      saveProductsToLocalStorage(updatedProducts);
+    try {
+      const response = await fetch('http://localhost:8088/api/perfumes/upload', {
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+        body: formData,
+      });
+
+      if (!response.ok) {
+        throw new Error('Error al subir la imagen');
+      }
+
+      const data = await response.json();
+      setNewProduct((prevState) => ({
+        ...prevState,
+        imagen: data.imagePath,
+      }));
+    } catch (error) {
+      console.error('Error al subir la imagen:', error);
     }
-
-    // Restablecer estados y cerrar formulario
-    setNewProduct({ id: '', nombre: '', precio: '', descripcion: '', imagen: '' });
-    setCurrentProductId(null);
-    setShowProductForm(false);
   };
 
-  // Función para agregar o editar usuarios
-  const handleAddUser = (e) => {
+  const handleAddProduct = async (e) => {
     e.preventDefault();
-    if (!newUser.username || !newUser.password) {
+    if (!newProduct.nombre || !newProduct.precio || !newProduct.descripcion || !newProduct.imagen) {
       alert('Por favor completa todos los campos.');
       return;
     }
 
-    if (currentUserId === null) {
-      // Crear un nuevo usuario
-      const nextId = users.length > 0 ? String(Math.max(...users.map((u) => Number(u.id))) + 1) : "1";
-      const newUserWithId = { ...newUser, id: nextId };
+    try {
+      const method = currentProductId ? 'PUT' : 'POST';
+      const url = currentProductId
+        ? `http://localhost:8088/api/perfumes/${currentProductId}`
+        : 'http://localhost:8088/api/perfumes';
 
-      const updatedUsers = [...users, newUserWithId];
-      setUsers(updatedUsers);
-      saveUsersToLocalStorage(updatedUsers);
-    } else {
-      // Editar un usuario existente
-      const updatedUsers = users.map((user) =>
-        user.id === currentUserId ? { ...newUser, id: currentUserId } : user
-      );
-      setUsers(updatedUsers);
-      saveUsersToLocalStorage(updatedUsers);
+      const response = await fetch(url, {
+        method,
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify(newProduct),
+      });
+
+      if (!response.ok) {
+        throw new Error('Error al guardar el producto');
+      }
+
+      await fetchProducts();
+      setNewProduct({ nombre: '', precio: '', descripcion: '', imagen: '' });
+      setCurrentProductId(null);
+      setShowProductForm(false);
+    } catch (error) {
+      console.error('Error al guardar el producto:', error);
     }
-
-    // Restablecer estados y cerrar formulario
-    setNewUser({ id: '', username: '', password: '', role: 'user' });
-    setCurrentUserId(null);
-    setShowUserForm(false);
   };
 
-  // editar un producto
+  const handleAddUser = async (e) => {
+    e.preventDefault();
+  
+    if (!newUser.username || !newUser.password) {
+      alert('Por favor completa todos los campos.');
+      return;
+    }
+  
+    const token = localStorage.getItem('token');
+    if (!token) {
+      alert('Por favor, inicia sesión para realizar esta acción.');
+      return;
+    }
+  
+    try {
+      const response = await fetch('http://localhost:8088/api/users/register', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`, // Encabezado de autenticación
+        },
+        body: JSON.stringify(newUser),
+      });
+  
+      if (!response.ok) {
+        throw new Error('Error al guardar el usuario');
+      }
+  
+      await fetchUsers(); // Refrescar la lista de usuarios
+      setNewUser({ username: '', password: '', role: 'user' });
+      setCurrentUserId(null);
+      setShowUserForm(false);
+    } catch (error) {
+      console.error('Error al guardar el usuario:', error);
+    }
+  };  
+
   const handleEditProduct = (product) => {
     setCurrentProductId(product.id);
     setNewProduct(product);
     setShowProductForm(true);
   };
 
-  // eliminar un producto
-  const handleDeleteProduct = (id) => {
-    const confirmDelete = window.confirm('¿Estás seguro de eliminar este producto?');
-    if (confirmDelete) {
-      const updatedProducts = products.filter((product) => product.id !== id);
-      setProducts(updatedProducts);
-      saveProductsToLocalStorage(updatedProducts);
-    }
-  };
-
-  // eliminar un usuario
-const handleDeleteUser = (id) => {
-  if (id == "1") {
-    alert("No se puede eliminar el usuario con ID = 1 (admin).");
-    return;
-  }
-
-  const confirmDelete = window.confirm('¿Estás seguro de eliminar este usuario?');
-  if (confirmDelete) {
-    const updatedUsers = users.filter((user) => user.id !== id);
-    setUsers(updatedUsers);
-    saveUsersToLocalStorage(updatedUsers);
-  }
-};
-
-
-  // editar un usuario
   const handleEditUser = (user) => {
     setCurrentUserId(user.id);
     setNewUser(user);
     setShowUserForm(true);
+  };
+
+  const handleDeleteProduct = async (id) => {
+    if (!window.confirm('¿Estás seguro de eliminar este producto?')) return;
+
+    try {
+      const response = await fetch(`http://localhost:8088/api/perfumes/${id}`, {
+        method: 'DELETE',
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      if (!response.ok) {
+        throw new Error('Error al eliminar el producto');
+      }
+
+      await fetchProducts();
+    } catch (error) {
+      console.error('Error al eliminar el producto:', error);
+    }
+  };
+
+  const handleDeleteUser = async (id) => {
+    if (!window.confirm('¿Estás seguro de eliminar este usuario?')) return;
+
+    try {
+      const response = await fetch(`http://localhost:8088/api/users/${id}`, {
+        method: 'DELETE',
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      if (!response.ok) {
+        throw new Error('Error al eliminar el usuario');
+      }
+
+      await fetchUsers();
+    } catch (error) {
+      console.error('Error al eliminar el usuario:', error);
+    }
   };
 
   return (
@@ -198,7 +234,7 @@ const handleDeleteUser = (id) => {
           onClick={() => {
             setShowProductForm(true);
             setCurrentProductId(null);
-            setNewProduct({ id: '', nombre: '', precio: '', descripcion: '', imagen: '' });
+            setNewProduct({ nombre: '', precio: '', descripcion: '', imagen: '' });
           }}
         >
           Añadir Producto
@@ -245,6 +281,15 @@ const handleDeleteUser = (id) => {
                 className="form-control"
                 onChange={handleFileChange}
               />
+              {newProduct.imagen && (
+                <div className="mt-2">
+                  <img
+                    src={`http://localhost:8088${newProduct.imagen}`}
+                    alt="Vista previa"
+                    style={{ width: '100px', height: '100px', objectFit: 'cover' }}
+                  />
+                </div>
+              )}
             </div>
             <button type="submit" className="btn btn-primary">
               {currentProductId === null ? 'Guardar' : 'Actualizar'}
@@ -282,7 +327,7 @@ const handleDeleteUser = (id) => {
                 <td>
                   {product.imagen && (
                     <img
-                      src={product.imagen}
+                      src={`http://localhost:8088${product.imagen}`}
                       alt={product.nombre}
                       style={{ width: '50px', height: '50px', objectFit: 'cover' }}
                     />
@@ -313,7 +358,7 @@ const handleDeleteUser = (id) => {
           onClick={() => {
             setShowUserForm(true);
             setCurrentUserId(null);
-            setNewUser({ id: '', username: '', password: '', role: 'user' });
+            setNewUser({ username: '', password: '', role: 'user' });
           }}
         >
           Añadir Usuario
@@ -370,7 +415,7 @@ const handleDeleteUser = (id) => {
 
         {/* Tabla de usuarios */}
         <h2>Usuarios</h2>
-        <table className="table table-striped mb-5">
+        <table className="table table-striped">
           <thead>
             <tr>
               <th>ID</th>
